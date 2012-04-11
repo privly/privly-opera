@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets" id="http://www.example.org/helloworld">
+<widget xmlns="http://www.w3.org/ns/widgets" id="https://www.priv.ly/">
 	<name>Privly 0.1.0</name>
 	<description>Privly enables you to post and read private content through any website. Only the people you designate can read your content, and the host page never has access. This extension is still experimental. For more information, visit https://priv.ly</description>
   	<author href="https://priv.ly" email="write2sanchit@gmail.com">Sanchit Karve</author>
