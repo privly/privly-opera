@@ -7,7 +7,18 @@
   			font: 14px helvetica, arial, sans-serif;
   			text-align: center;
   		 }
-  	</style>	
+  	</style>
+<script src="scripts/jquery-1.6.3.min.js"></script>
+<script>
+	$(document).ready(function()
+	{		
+	alert(opera.extension.bgProcess.privlyAuthentication.authToken);
+		if(opera.extension.bgProcess.privlyAuthentication.authToken)
+			$('h1').text(opera.extension.bgProcess.privlyAuthentication.authToken);
+		else
+			$('h1').text("Not logged in");
+	});
+</script>
   </head>
   <body>
   	<h1>Placeholder Stub</h1>

@@ -11,6 +11,8 @@ However, to try it out in "developer mode", just download the source and drag th
 h2. Caveats
 * No Context Menu API
 ** It is impossible to extend Opera's context menu in versions 11.x and below. However, Opera devs have promised a Context Menu API for Opera 12.
+* Inter-Script Communication
+** Opera offers its own "Messaging API":http://dev.opera.com/articles/view/extensions-api-messaging/ along with a "bgProcess":http://dev.opera.com/articles/view/extensions-api-messaging-bgProcess/ object for inter-script communication. "Click here":http://dev.opera.com/articles/view/accessing-an-opera-extensions-background-process/ for more information on how messaging works with bgProcess.
 * No Cross-Origin Web Requests
 ** This is most probably a bug as Opera does allow the "access tag":http://dev.opera.com/articles/view/extensions-api-config-access/ in the extension's config file.
 ** A current workaround is to either use JSONP (which is not currently supported by Privly) or a jQuery Hack ( $.support.cors = true; )

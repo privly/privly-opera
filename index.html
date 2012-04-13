@@ -1,24 +1,9 @@
-<!doctype html>
-<html lang="en">
-  <head>
-<script type="text/javascript" src="jquery.js"></script>  
-    <script>
-       window.addEventListener("load", function(){
-        var theButton;
-        var ToolbarUIItemProperties = {
-          title: "Privly",
-          icon: "icons/logo_64.png",
-          popup: {
-            href: "popup.html",
-            width: 110,
-            height: 30
-          }
-        }
-        theButton = opera.contexts.toolbar.createItem(ToolbarUIItemProperties);
-        opera.contexts.toolbar.addItem(theButton);
-      }, false);
-    </script>
-  </head>
-  <body>
-  </body>
+<!DOCTYPE html>
+<html>
+<head>
+<!-- This HTML file is just used to call a script that will run in the background. -->
+<script type="text/javascript" src="background.js"></script>
+</head>
+<body>
+</body>
 </html>

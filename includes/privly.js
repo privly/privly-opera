@@ -1,3 +1,8 @@
+// ==UserScript==
+// @include http://*/*
+// @include https://*/*
+// ==/UserScript==
+// Opera needs UserJS Headers
 /*******************************************************************************
 Open Source Initiative OSI - The MIT License (MIT):Licensing
 [OSI Approved License]
@@ -24,7 +29,6 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 *******************************************************************************/
-
 var privly = {
 
   //Matches:
@@ -257,6 +261,7 @@ var privly = {
       if(privly.runPending )
         return;
       privly.runPending=true;
+	  
       
       setTimeout(
         function(){

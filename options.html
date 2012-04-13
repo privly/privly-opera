@@ -1,9 +1,86 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Options</title>            
-  </head>
-  <body>
-    <h1 class="note">Placeholder Stub.</h1>
-  </body>
+<head>
+<meta charset="UTF-8">
+<title>Login Settings</title>
+<style>
+form {
+	padding: 10px 10px 10px 10px;
+}
+label {
+	display: inline-block;
+	width: 100px;
+	text-align:right;
+	margin: 0 15px 0 0;
+	color: black;
+}
+input {
+	font-size: 14px;	
+}
+#button {
+	margin-left: 115px;	
+}
+</style>
+<script src="scripts/jquery-1.6.3.min.js"></script>
+<script>
+//Settings Page Message Handler
+// Used here to retrieve result of user login to Privly.
+// Message (and Message Codes) sent by Background Process.
+opera.extension.onmessage = function(event)
+{		
+		if(event.data == 'loginSuccess')
+		{
+			alert("You are now logged into Privly");
+			window.close();
+		}
+		else if(event.data == 'loginFailed')
+		{
+			//TODO: Instead of displaying an alert, use JQ to display the result on the page itself.
+			alert("Incorrect email or password for Priv.ly login");
+		}		
+		else if(event.data == 'loginServerUnreachable')
+		{
+			//TODO: Instead of displaying an alert, use JQ to display the result on the page itself.
+			alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
+		}
+}
+	
+$(document).ready(function()
+{	
+	$('#login').submit(function()
+	{	
+		var userEmailAddress = $('#username').val();
+		var userPassword = $('#password').val();				
+		// Call Login Function from background process
+		opera.extension.bgProcess.privlyAuthentication.loginToPrivly(userEmailAddress,userPassword);
+		return false;
+   }); 
+		
+});
+</script>
+</head>
+<body>
+<div id="content">
+		<div class="main">
+			<h1>Login</h1>
+			<div id="formwrapper">
+			<form method="get" action="" id="login">
+	<p>
+		<label for="username">Username:</label>
+		<input type="text" name="username" id="username">
+	</p>
+	<p>
+		<label for="password">Password: </label>
+		<input type="password" name="password" id="password">
+	</p>
+	<p>
+		<input type="submit" name="button" id="button" value="Submit" >
+	</p>
+</form>
+</div>
+		</div>
+	</div>
+	<div class="footer">		
+	</div>
+</body>
 </html>
