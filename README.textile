@@ -4,9 +4,9 @@ Opera handles extensions in a much different way than Firefox and Chrome. This d
 
 h2. How To Use The Opera Extension
 
-Once the extension has reached the same level of maturity as the Firefox and Chrome extensions, I'll submit it to the "Opera Extensions Catalog":https://addons.opera.com/en/addons/extensions/.
+The Alpha Release (i.e. version 0.1.1.1) has been submitted to the "Opera Extensions Catalog":https://addons.opera.com/en/addons/extensions/ and is currently awaiting review.
 
-However, to try it out in "developer mode", just download the source and drag the config.xml file into the Opera browser to install it.
+If you prefer not to wait, you can try out Privly in "developer mode". Just download the source and drag the config.xml file into your Opera browser to install it.
 
 h2. Caveats
 * No Context Menu API
