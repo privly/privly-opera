@@ -1,86 +1,185 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Login Settings</title>
-<style>
-form {
-	padding: 10px 10px 10px 10px;
-}
-label {
-	display: inline-block;
-	width: 100px;
-	text-align:right;
-	margin: 0 15px 0 0;
-	color: black;
-}
-input {
-	font-size: 14px;	
-}
-#button {
-	margin-left: 115px;	
-}
-</style>
-<script src="scripts/jquery-1.6.3.min.js"></script>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/options.css">
+  <title id="widget-title">Opera Extensions | Privly</title>
+</head>
+<body>
+  <header>
+    <img src="icons/logo_64.png">
+    <h1 id="widget-name">Extension name v1.01</h1>
+    <h2>By <span id="widget-author">Developer</h2>
+	<p>Privly enables you to post and read private content through any website. Only the people you designate can read your content, and the host page never has access. This extension is still experimental.</p>
+  </header>
+
+  <section>	
+    <h3>Login to Privly</h3>
+    <fieldset id="frmLogin">
+      <p>
+		<label for="txtEmail" style="margin-right: 22px;">Email:</label>
+        <input id="txtEmail" name="txtEmail" type="text"></input>        
+      </p>
+      <p>
+		<label for="txtPassword">Password:</label>
+        <input id="txtPassword" name="txtPassword" type="password"></input>        
+      </p>
+      <p>
+		<button name="btnLogin" id="btnLogin">Login</button>
+		<label for="btnLogin" style="display: none; color:red;" id="lblLoginStatus"></label>        
+      </p>
+    </fieldset>		   
+	
+    <fieldset id="frmLogout">
+      <p>
+        <button name="btnLogout" id="btnLogout">Logout</button>
+		<label for="btnLogin" style="display: none; color:red;" id="lblLogoutStatus"></label>        
+      </p>
+    </fieldset>	
+    
+
+    <h3>Preferences</h3>
+    <fieldset>
+      <p>
+        <input name="check" id="check1" value="0" type="checkbox"></input>
+        <label for="check1">Autorun (NOT IMPLEMENTED)</label>
+      </p>      
+    </fieldset>
+
+
+
+
+
+
+    <p>For more information, visit <a href="https://www.priv.ly">Priv.ly</a>.</p>
+
+  </section>
+
+  <footer>
+    <p>Powered by Priv.ly</p>
+  </footer>
+<script src="scripts/jquery-1.7.2.min.js"></script>
 <script>
 //Settings Page Message Handler
 // Used here to retrieve result of user login to Privly.
 // Message (and Message Codes) sent by Background Process.
 opera.extension.onmessage = function(event)
 {		
-		if(event.data == 'loginSuccess')
+		//opera.postError("INMessage");
+		var d = event.data;
+		if(d.type == 'loginSuccess')
 		{
-			alert("You are now logged into Privly");
-			window.close();
+			//widget.preferences.authToken = opera.extension.bgProcess.privlyAuthentication.authToken;
+			//alert("You are now logged into Privly");
+			//opera.postError('InSuccessMsg');
+			$('#lblLoginStatus').text('You are now logged into Privly.');
+			$('#lblLoginStatus').fadeIn();	
+			toggleLoginForm();
+			//window.close();
 		}
-		else if(event.data == 'loginFailed')
-		{
-			//TODO: Instead of displaying an alert, use JQ to display the result on the page itself.
-			alert("Incorrect email or password for Priv.ly login");
+		else if(d.type == 'loginFailed')
+		{			
+			//alert("Incorrect email or password for Priv.ly login");
+			//opera.postError('inFailedMsg');
+			$('#lblLoginStatus').text('Incorrect email or password for Privly login.');
+			$('#lblLoginStatus').fadeIn();			
+			toggleLoginForm();
+			
 		}		
-		else if(event.data == 'loginServerUnreachable')
-		{
-			//TODO: Instead of displaying an alert, use JQ to display the result on the page itself.
-			alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
+		else if(d.type == 'loginServerUnreachable')
+		{			
+			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
+			//opera.postError('inUnreachMSG');
+			$('#lblLoginStatus').text('We could not contact the Priv.ly servers. If the problem persists, please file a bug report.');
+			$('#lblLoginStatus').fadeIn();
+			toggleLoginForm();
+		}
+		else if(d.type == 'logoutSuccess')
+		{			
+			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");			
+			$('#lblLogoutStatus').text('Logged out successfully.');
+			$('#lblLogoutStatus').fadeIn();
+			toggleLoginForm();
+			//$('#lblLoginStatus').text('We could not contact the Priv.ly servers. If the problem persists, please file a bug report.').fadeIn();
+		}
+		else if(d.type == 'logoutFailure')
+		{			
+			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
+			//opera.postError("logout sucks");			
+			$('#lblLogoutStatus').text("Logout Error :" + d.message);
+			$('#lblLogoutStatus').fadeIn();	
+			toggleLoginForm();			
 		}
 }
 	
 $(document).ready(function()
 {	
-	$('#login').submit(function()
-	{	
-		var userEmailAddress = $('#username').val();
-		var userPassword = $('#password').val();				
+	$('#widget-title').text(widget.name);
+	$('#widget-name').text(widget.name);
+	$('#widget-author').text(widget.author);
+	
+	toggleLoginForm();
+	
+	
+	$('#btnLogin').click(function()
+	{
+		$('#lblLoginStatus').text('Signing In...');
+		$('#lblLoginStatus').fadeIn();
+		$('#lblLogoutStatus').text('');
+		$('#lblLogoutStatus').hide();
+		//opera.postError('inLogin');
+		var userEmailAddress = $('#txtEmail').val();
+		var userPassword = $('#txtPassword').val();				
 		// Call Login Function from background process
 		opera.extension.bgProcess.privlyAuthentication.loginToPrivly(userEmailAddress,userPassword);
 		return false;
-   }); 
+   });   
+   
+   $('#btnLogout').click(function()
+	{	
+		$('#lblLogoutStatus').text('Logging out...');
+		$('#lblLogoutStatus').fadeIn();
+		$('#lblLoginStatus').text('');
+		$('#lblLoginStatus').hide();
+		//opera.postError('inLogout');
+		var userEmailAddress = $('#txtEmail').val();
+		var userPassword = $('#txtPassword').val();				
+		// Call Login Function from background process
+		opera.extension.bgProcess.privlyAuthentication.logoutFromPrivly();
+		return false;
+   });
+   
 		
 });
+
+
+function toggleWithAnimateLoginForm()
+{
+	if(widget.preferences.authToken !== "")
+	{
+		$('#frmLogin').fadeOut(2000);		
+		$('#frmLogout').fadeIn();		
+	}
+	else
+	{
+		$('#frmLogout').fadeOut(2000);
+		$('#frmLogin').show().slideUp();
+	}
+}
+
+function toggleLoginForm()
+{
+	if(widget.preferences.authToken !== "")
+	{
+		$('#frmLogin').hide();
+		$('#frmLogout').show();
+	}
+	else
+	{
+		$('#frmLogout').hide();
+		$('#frmLogin').show();
+	}
+}
 </script>
-</head>
-<body>
-<div id="content">
-		<div class="main">
-			<h1>Login</h1>
-			<div id="formwrapper">
-			<form method="get" action="" id="login">
-	<p>
-		<label for="username">Username:</label>
-		<input type="text" name="username" id="username">
-	</p>
-	<p>
-		<label for="password">Password: </label>
-		<input type="password" name="password" id="password">
-	</p>
-	<p>
-		<input type="submit" name="button" id="button" value="Submit" >
-	</p>
-</form>
-</div>
-		</div>
-	</div>
-	<div class="footer">		
-	</div>
 </body>
 </html>

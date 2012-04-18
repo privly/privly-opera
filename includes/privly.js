@@ -234,6 +234,8 @@ var privly = {
     privly.replaceLinks();
   },
   
+  bgProcess: "",
+  
   //runs privly once then registers the update listener
   //for dynamic pages
   listeners: function(){
@@ -269,7 +271,102 @@ var privly = {
           privly.run();
         },
         500);
+		
+		for (i=0; i < document.getElementsByTagName("input").length; i++)
+		{	 
+		
+		
+		document.getElementsByTagName("input")[i].onchange=function(){
+			//opera.postError("wtf");
+			//opera.extension.bgProcess.content = window.event.target.value;
+			privly.bgProcess.postMessage({message: window.event.target.value, type: "contentPost", inputTag: "input", inputLocation: i});
+			//window.event.target.value = window.event.target.value.toUpperCase();
+			//int=self.setInterval("alertit()",3000);
+		}
+		}
+		
+		for (i=0; i < document.getElementsByTagName("textarea").length; i++)
+		{	 
+		
+		
+		document.getElementsByTagName("textarea")[i].onchange=function(){
+			//opera.postError("wtf");
+			//opera.extension.bgProcess.content = window.event.target.value;
+			privly.bgProcess.postMessage({message: window.event.target.value, type: "contentPost", inputTag: "textarea", inputLocation: i});
+			//window.event.target.value = window.event.target.value.toUpperCase();
+			//int=self.setInterval("alertit()",3000);
+		}
+		
+				
+}
     });
+	//Sanchit
+	
+	/*document.addEventListener("change", function(event) {
+		
+	
+	});*/
+	
+	/*opera.extension.onmessage = function(event){
+		var thecatch = event.data; // event.data in this case will contain the string "Hello there"
+	};*/
+	opera.extension.onmessage = function(event){
+		// Get content of incoming message.
+		var d  = event.data;
+		if(d.type == "privly:init")
+		{
+			privly.bgProcess = event.source;
+			//opera.postError("Background process sent");
+		}
+		if(d.type == "postContentSuccess")
+		{
+			if(d.post.postTag == "textarea")
+			{
+				//document.getElementsByTagName("textarea")[d.post.postLocation].value = d.message;
+				//d.post.target.value = d.message;
+				//TODO: Use document.querySelectorAll('textarea,input') instead
+				for (i=0; i < document.getElementsByTagName("textarea").length; i++)
+				{
+					if(document.getElementsByTagName("textarea")[i].value == d.post.content)
+					{
+						document.getElementsByTagName("textarea")[i].onchange = null;												
+						document.getElementsByTagName("textarea")[i].value = d.message;
+					}
+				}
+				if(document.domain == "facebook.com")
+				{
+					for (i=0; i < document.getElementsByTagName("input").length; i++)
+					{
+						if(document.getElementsByTagName("input")[i].value == d.post.content)
+						{
+							document.getElementsByTagName("input")[i].onchange = null;												
+							document.getElementsByTagName("input")[i].value = d.message;
+						}
+					}
+				}
+			}
+			if(d.post.postTag == "input")
+			{				
+				for (i=0; i < document.getElementsByTagName("input").length; i++)
+				{
+					if(document.getElementsByTagName("input")[i].value == d.post.content)
+					{
+						document.getElementsByTagName("input")[i].onchange = null;												
+						document.getElementsByTagName("input")[i].value = d.message;
+					}
+				}
+			}
+			
+		}
+		if(d.type == "postContentFailed")
+		{
+			
+		}
+
+		//  Replies back to background script.
+		//var reply = "Background process's message only had " + (message ? message.length : 0) + " characters.";
+		//privly.bgProcess.postMessage(reply); 
+};
   },
   
   //indicates whether the extension shoud immediatly replace all Privly

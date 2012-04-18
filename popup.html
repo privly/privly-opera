@@ -2,25 +2,130 @@
 <html lang="en">
   <head>
   	<title>Privly</title>
-  	<style>
-  		h1 {
-  			font: 14px helvetica, arial, sans-serif;
-  			text-align: center;
-  		 }
-  	</style>
-<script src="scripts/jquery-1.6.3.min.js"></script>
+	<style type="text/css">
+ul {
+	list-style: none;
+	margin: 1em 0;
+	padding: 0; 
+}
+ul li {
+	font-weight: bold;
+	margin: 0;
+	padding: 3px 10px 5px 20px;
+	border-bottom: 1px solid #ccc;
+	color: #666;
+	cursor: pointer;
+}
+ul li:hover {
+	color: #000;
+	background-color: #ddd; 
+}
+a:link, a:visited {	
+	text-decoration: none;
+	color: #666;
+	}	
+a:hover, a:active {	
+	text-decoration: none;
+	color: #000;
+	}
+</style>
+  	
+  </head>
+  <body>
+  <div id="loginContentOnly">
+		<ul>
+		<li id="postContent">Post Content</li>      		
+		</ul>
+		<br />		
+		<ul>
+		<li><a href="https://priv.ly/posts">My Posts</a></li>      
+		<li><a href="https://priv.ly/pages/account">My Account</a></li>		
+		</ul>
+		<br />
+	</div>
+		<ul>		
+		<li><a href="options.html" target="_blank"  id="options">Logout From Privly</a></li>      				
+		</ul>
+		
+    
+  </body>
+  <script src="scripts/jquery-1.7.2.min.js"></script>
 <script>
+
 	$(document).ready(function()
 	{		
-	alert(opera.extension.bgProcess.privlyAuthentication.authToken);
+		if(widget.preferences.authToken)
+		{
+			$('#loginContentOnly').show();
+			$('#options').text('Logout From Privly');
+		}
+		else
+		{
+			$('#loginContentOnly').hide();
+			$('#options').text('Login To Privly');
+		}
+		
+		if(opera.extension.bgProcess.postInfo.content !== "")
+		{
+			$('#postContent').text('Post Content');
+		}
+		else
+		{
+			$('#postContent').text('Nothing found to Post. Enter some text on the website to enable posting from here.');
+		}
+		
+		$('#postContent').click(function(){
+			if(opera.extension.bgProcess.postInfo.content !== "")
+			{
+				opera.extension.bgProcess.privlyAuthentication.postToPrivly();
+			}
+			
+		});
+		/*
+		$('#options').click(function(e){
+			if($(this).text() === 'Logout From Privly')
+			{	
+				e.preventDefault();
+				opera.extension.bgProcess.privlyAuthentication.logoutFromPrivly();				
+				
+			}
+			
+		});
+		*/
+	//alert(opera.extension.bgProcess.privlyAuthentication.authToken);
+	//alert("content = " + opera.extension.bgProcess.content);
 		if(opera.extension.bgProcess.privlyAuthentication.authToken)
 			$('h1').text(opera.extension.bgProcess.privlyAuthentication.authToken);
 		else
 			$('h1').text("Not logged in");
+			
+			if(opera.extension.bgProcess.postInfo.content)
+			$('h2').text(opera.extension.bgProcess.postInfo.content + " : " + opera.extension.bgProcess.postInfo.postTag + " : " + opera.extension.bgProcess.postInfo.postLocation);
+		else
+			$('h2').text("Nothing to Post");
+			
+			$('h3').click(function()
+			{
+				event.preventDefault();
+				if(opera.extension.bgProcess.privlyAuthentication.authToken)
+				{
+					opera.extension.bgProcess.privlyAuthentication.postToPrivly();				
+				}
+				else
+				{
+					alert("Not logged in");
+				}
+			
+			});
+			$('h4').click(function()
+			{
+				opera.extension.bgProcess.privlyAuthentication.logoutFromPrivly();
+				opera.window.close();
+			
+			});
 	});
+	
+	
 </script>
-  </head>
-  <body>
-  	<h1>Placeholder Stub</h1>
-  </body>
+
 </html>
