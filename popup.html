@@ -34,7 +34,8 @@ a:hover, a:active {
   <body>
   <div id="loginContentOnly">
 		<ul>
-		<li id="postContent">Post Content</li>      		
+		<li id="postContent" class="postContent">Post Content</li>      		
+		<li id="postContentPreview" class="postContent" style="color:orange;"></li>
 		</ul>
 		<br />		
 		<ul>
@@ -68,13 +69,21 @@ a:hover, a:active {
 		if(opera.extension.bgProcess.postInfo.content !== "")
 		{
 			$('#postContent').text('Post Content');
+			var post = opera.extension.bgProcess.postInfo.content;
+			if(post.length <= 42)
+				$('#postContentPreview').text(post);
+			else
+			{
+				$('#postContentPreview').text(post.substring(0, 42) + "...");
+			}
 		}
 		else
-		{
-			$('#postContent').text('Nothing found to Post. Enter some text on the website to enable posting from here.');
+		{			
+			$('#postContent').text('Nothing found to Post.');
+			$('#postContentPreview').text('Type some text on the website to see a preview here.');
 		}
 		
-		$('#postContent').click(function(){
+		$('.postContent').click(function(){
 			if(opera.extension.bgProcess.postInfo.content !== "")
 			{
 				opera.extension.bgProcess.privlyAuthentication.postToPrivly();

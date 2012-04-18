@@ -11,7 +11,7 @@ window.addEventListener("load", function() {
 		popup: {                // Popup is just being used for testing purposes.
             href: "popup.html",
             width: 200,
-            height: 300
+            height: 320
           }
 		/*onclick: function() {
 			// Send a message to the currently-selected tab.
@@ -118,7 +118,7 @@ var privlyAuthentication =
 		{
 	    //TODO: Get version number directly from config.xml
         data: { email: userEmailAddress, password: userPassword,
-          endpoint:"extension", browser:"opera", version:"0.1.1.1"
+          endpoint:"extension", browser:"opera", version:"0.1.1.2"
         },
         type: "POST",
 		//TODO:Use opera.widgets.preferences to store contentServerUrl and other strings. Remove hardcoded url
@@ -165,7 +165,7 @@ var privlyAuthentication =
 		{
 	    //TODO: Get version number directly from config.xml
         data: { auth_token: privlyAuthentication.authToken, "post[content]":postInfo.content,
-          endpoint:"extension", browser:"opera", version:"0.1.1.1"
+          endpoint:"extension", browser:"opera", version:"0.1.1.2"
         },
         type: "POST",
 		//TODO:Use opera.widgets.preferences to store contentServerUrl and other strings. Remove hardcoded url
@@ -199,7 +199,7 @@ var privlyAuthentication =
     $.ajax(
       {
         data: { _method: "delete", endpoint:"extension", browser:"opera", 
-          version:"0.1.1.1", auth_token: privlyAuthentication.getAuthToken()
+          version:"0.1.1.2", auth_token: privlyAuthentication.getAuthToken()
         },
         type: "POST",
         //url: privlyExtension.preferences.getCharPref("contentServerUrl")+"/token_authentications.json",

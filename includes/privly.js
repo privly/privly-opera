@@ -272,13 +272,14 @@ var privly = {
         },
         500);
 		
-		for (i=0; i < document.getElementsByTagName("input").length; i++)
+		var inputTags = document.querySelectorAll("input[type='text']"); 
+		for (i=0; i < inputTags.length; i++)
 		{	 
 		
 		
-		document.getElementsByTagName("input")[i].onchange=function(){
-			//opera.postError("wtf");
+		inputTags[i].onchange=function(){			
 			//opera.extension.bgProcess.content = window.event.target.value;
+			//TODO: Remove inputLocation. REFER: background.js::postInfo
 			privly.bgProcess.postMessage({message: window.event.target.value, type: "contentPost", inputTag: "input", inputLocation: i});
 			//window.event.target.value = window.event.target.value.toUpperCase();
 			//int=self.setInterval("alertit()",3000);
@@ -335,24 +336,26 @@ var privly = {
 				}
 				if(document.domain == "facebook.com")
 				{
-					for (i=0; i < document.getElementsByTagName("input").length; i++)
+					var hiddenInputTags = document.querySelectorAll("input[type='hidden']"); 
+					for (i=0; i < hiddenInputTags.length; i++)
 					{
-						if(document.getElementsByTagName("input")[i].value == d.post.content)
+						if(hiddenInputTags[i].value == d.post.content)
 						{
-							document.getElementsByTagName("input")[i].onchange = null;												
-							document.getElementsByTagName("input")[i].value = d.message;
+							hiddenInputTags[i].onchange = null;												
+							hiddenInputTags[i].value = d.message;
 						}
 					}
 				}
 			}
 			if(d.post.postTag == "input")
 			{				
-				for (i=0; i < document.getElementsByTagName("input").length; i++)
+				var inputTags = document.querySelectorAll("input[type='text']"); 
+				for (i=0; i < inputTags.length; i++)
 				{
-					if(document.getElementsByTagName("input")[i].value == d.post.content)
+					if(inputTags[i].value == d.post.content)
 					{
-						document.getElementsByTagName("input")[i].onchange = null;												
-						document.getElementsByTagName("input")[i].value = d.message;
+						inputTags[i].onchange = null;												
+						inputTags[i].value = d.message;
 					}
 				}
 			}
