@@ -1,5 +1,6 @@
 // Quick-Hack to load JQuery before Background process loads.
 document.write("<script type=\"text/javascript\" src=\"scripts/jquery-1.7.2.min.js\"></script>");
+
 // Add a button to Opera's toolbar when the extension loads.
 window.addEventListener("load", function() {
 	// Buttons are members of the UIItem family.
@@ -12,7 +13,13 @@ window.addEventListener("load", function() {
             href: "popup.html",
             width: 200,
             height: 320
-          }
+          },
+		badge: {
+            	display: "none",
+            	textContent: "A",
+            	color: "white",
+                backgroundColor: "rgba(211, 0, 4, 1)"
+        }
 		/*onclick: function() {
 			// Send a message to the currently-selected tab.
 			var tab = opera.extension.tabs.getFocused();
@@ -21,30 +28,28 @@ window.addEventListener("load", function() {
 				//tab.postMessage('go');
 			}
 		}*/
-	};
+	};  
 
 	// Next, we create the button and apply the above properties.
-    var button = opera.contexts.toolbar.createItem(UIItemProperties);
+    extensionButton = opera.contexts.toolbar.createItem(UIItemProperties);
     // Finally, we add the button to the toolbar.
-    opera.contexts.toolbar.addItem(button);
+    opera.contexts.toolbar.addItem(extensionButton);
 	
-	if(widget.preferences.authToken)
-	{
+	if(widget.preferences.authToken) {
 		privlyAuthentication.setAuthToken(widget.preferences.authToken);		
 	}
-	else
-	{
+	else {
 		privlyAuthentication.setAuthToken("");
 	}
     
 	function enableButton() {
 		var tab = opera.extension.tabs.getFocused();
 		if (tab) {
-			button.disabled = false;
+			extensionButton.disabled = false;
 		} else {
-			button.disabled = true;
+			extensionButton.disabled = true;
 		}
-	}
+	}	
 	
 	// Enable the button when a tab is ready.
 	// Prevents user from attempting to post content when no tabs are open.
@@ -52,8 +57,7 @@ window.addEventListener("load", function() {
 	//opera.extension.tabs.onfocus = enableButton;
 	//opera.extension.tabs.onblur = enableButton;	 
 	
-	opera.extension.onconnect = function(event)
-	{
+	opera.extension.onconnect = function(event)	{
         // Post message to the source, that is, the thing which connected to us (in this case the injected script) 
 		event.source.postMessage({type: "privly:init"}); 
         // Post this message in the opera error console
@@ -61,10 +65,8 @@ window.addEventListener("load", function() {
    }
    
    // Listen for messages                
-   opera.extension.onmessage = function(event)
-   {		
-		if(event.data.type == "contentPost")
-		{
+   opera.extension.onmessage = function(event) {		
+		if(event.data.type == "contentPost") {
 			postInfo.content = event.data.message;
 			postInfo.postTag = event.data.inputTag;
 			postInfo.postLocation = event.data.inputLocation;
@@ -75,50 +77,61 @@ window.addEventListener("load", function() {
 	
 }, false);
 
+// Reference to the extension's button
+var extensionButton;
+ 
+ /*
+ * enum to hold various extension modes and their value. extension modes are set through Opera's
+ * extension api.
+ */ 
+var extensionModeEnum = {
+	ACTIVE : 0,
+    PASSIVE : 1,
+    CLICKTHROUGH : 2
+};
+
 //TODO: Remove postLocation and related code. No longer needed.
-var postInfo =
-{
+var postInfo = {
 	content : "",
 	postTag : "",
 	postLocation : ""
 };
 
-//BEGIN (modded) authentication.js from Firefox Extension
+function broadcastModeChange(newMode) {
+		opera.postError("initiate broadcast mode call");
+		opera.extension.broadcastMessage({type : "extensionModeChange", mode: newMode});		
+}
 
+//BEGIN (modded) authentication.js from Firefox Extension
 // Manages sessions for the content server
 
-var privlyAuthentication = 
-{
+var privlyAuthentication = {
   //When added to every request to the content server
   //as the parameter auth_token, the extension has access
   //to the referenced user account
   authToken: "",  
   
-  setAuthToken : function(auth)
-  {
+  setAuthToken : function(auth) {
 	privlyAuthentication.authToken = auth;
 	widget.preferences.authToken = auth;
   },
   
-  getAuthToken : function()
-  {
+  getAuthToken : function() {
 	return privlyAuthentication.authToken;	
   },
   
   //get a new auth token
-  loginToPrivly : function(userEmailAddress, userPassword)
-  {
+  loginToPrivly : function(userEmailAddress, userPassword) {
 		// Opera 11.x does not support cross-origin scripting.
-		// Opera says Opera 12 will fix it.
+		// Rumors suggest Opera 12 will fix it.
 		// Until then, jQuery provides a nice hack.
 		$.support.cors = true;
 		//opera.postError('pre-login-ajax');
                                                 
-    $.ajax(
-		{
+    $.ajax(	{
 	    //TODO: Get version number directly from config.xml
         data: { email: userEmailAddress, password: userPassword,
-          endpoint:"extension", browser:"opera", version:"0.1.1.2"
+          endpoint:"extension", browser:"opera", version:"0.1.1.3"
         },
         type: "POST",
 		//TODO:Use opera.widgets.preferences to store contentServerUrl and other strings. Remove hardcoded url
@@ -129,22 +142,19 @@ var privlyAuthentication =
         accepts: "json",
         success: function(data, textStatus, jqXHR){          
 		  privlyAuthentication.setAuthToken(data.auth_key);
-          if(privlyAuthentication.getAuthToken())
-          {		    
+          if(privlyAuthentication.getAuthToken()) {		    
 			//opera.postError('loginsuccess');
 			//Broadcast Success Message to Preferences Page (options.html)
 			opera.extension.broadcastMessage({type : "loginSuccess"});			
           }
-          else
-          {	
+          else {	
 			//Broadcast Login Failed Message to Preferences Page (options.html)
 			privlyAuthentication.setAuthToken("");
 			//opera.postError('loginfailed');
 			opera.extension.broadcastMessage({type : "loginFailed"});			
           }
         },
-        error: function(data, textStatus, jqXHR)
-		{            
+        error: function(data, textStatus, jqXHR) {            
 			//Broadcast Server Error Message to Preferences Page (options.html)
 			//opera.postError('unreachable');
 			opera.extension.broadcastMessage({type : "loginServerUnreachable"});			
@@ -153,19 +163,17 @@ var privlyAuthentication =
     );	
   },
   
-    //get a new auth token
-  postToPrivly : function()
-  {
+  //get a new auth token
+  postToPrivly : function() {
 		// Opera 11.x does not support cross-origin scripting.
-		// Opera says Opera 12 will fix it.
+		// Rumors suggest Opera 12 will fix it.
 		// Until then, jQuery provides a nice hack.
 		$.support.cors = true;
                                                 
-    $.ajax(
-		{
+    $.ajax({
 	    //TODO: Get version number directly from config.xml
         data: { auth_token: privlyAuthentication.authToken, "post[content]":postInfo.content,
-          endpoint:"extension", browser:"opera", version:"0.1.1.2"
+          endpoint:"extension", browser:"opera", version:"0.1.1.3"
         },
         type: "POST",
 		//TODO:Use opera.widgets.preferences to store contentServerUrl and other strings. Remove hardcoded url
@@ -178,8 +186,7 @@ var privlyAuthentication =
 			postInfo.content = "";
                     
         },
-        error: function(data, textStatus, jqXHR)
-		{            
+        error: function(data, textStatus, jqXHR) {            
 			//Broadcast Server Error Message to Preferences Page (options.html)
 			opera.extension.broadcastMessage({type: "postContentFailed"});					
         }
@@ -188,18 +195,16 @@ var privlyAuthentication =
   },
   
   //destroy the auth token  
-  logoutFromPrivly : function()
-  {
+  logoutFromPrivly : function() {
 		// Opera 11.x does not support cross-origin scripting.
-		// Opera says Opera 12 will fix it.
+		// Rumors suggest Opera 12 will fix it.
 		// Until then, jQuery provides a nice hack.
 		$.support.cors = true;
 		//opera.postError("pre-ajax");
 		
-    $.ajax(
-      {
+    $.ajax({
         data: { _method: "delete", endpoint:"extension", browser:"opera", 
-          version:"0.1.1.2", auth_token: privlyAuthentication.getAuthToken()
+          version:"0.1.1.3", auth_token: privlyAuthentication.getAuthToken()
         },
         type: "POST",
         //url: privlyExtension.preferences.getCharPref("contentServerUrl")+"/token_authentications.json",

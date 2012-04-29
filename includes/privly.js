@@ -2,7 +2,7 @@
 // @include http://*/*
 // @include https://*/*
 // ==/UserScript==
-// Opera needs UserJS Headers
+// Opera recommends UserJS Headers
 /*******************************************************************************
 Open Source Initiative OSI - The MIT License (MIT):Licensing
 [OSI Approved License]
@@ -38,6 +38,16 @@ var privly = {
   //                                                                          
   //also matches localhost:3000
   privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
+  
+  /*
+   * enum to hold various extension modes and their value. extension modes are set through firefox's
+   * extension api. https://developer.mozilla.org/en/Code_snippets/Preferences
+   */ 
+  extensionModeEnum : {
+    ACTIVE : 0,
+    PASSIVE : 1,
+    CLICKTHROUGH : 2
+  },
   
   // Takes a domain with an optional http(s) in front and returns a fully formed domain name
   makeHref: function(domain)
@@ -110,16 +120,15 @@ var privly = {
         e.cancelBubble = true;
         e.stopPropagation();
         e.preventDefault();
-        privly.replaceLink(anchor);
-      }, 
-      true);
+        privly.replaceLink(anchor);		
+      });
   },
   
   //Checks link attributes and text for privly links without the proper href attribute.
   //Twitter and other hosts change links so they can collect click events.
   correctIndirection: function() 
   {
-    var anchors = document.links;
+    var anchors = document.links;	
     var i = anchors.length;
     while (i--){
       var a = anchors[i];
@@ -155,7 +164,10 @@ var privly = {
 
   // Replace an anchor element with its referenced content.
   replaceLink: function(object) 
-  { 
+  {
+	if(object)
+	{
+	
     var iFrame = document.createElement('iframe');
     iFrame.setAttribute("frameborder","0");
     iFrame.setAttribute("vspace","0");
@@ -172,29 +184,42 @@ var privly = {
     iFrame.setAttribute("style","width: 100%; height: 32px; overflow: hidden;");
     iFrame.setAttribute("scrolling","no");
     iFrame.setAttribute("overflow","hidden");
-    
-    object.parentNode.replaceChild(iFrame, object);
+	if(object.parentNode) {
+		opera.postError("obj = " + object + " pn = " + object.parentNode);
+		object.parentNode.replaceChild(iFrame, object);
+	}
+	}
   },
-
+  
   //Replace all Privly links with their iframe
   replaceLinks: function(){
+        elements = document.getElementsByTagName("privModeElement");
+    if(elements != null && elements.length != 0){
+      this.extensionMode = elements[0].getAttribute('mode');
+    }
     var anchors = document.links;
     var i = anchors.length;
-    while (i--){
+
+    while (--i >= 0){
       var a = anchors[i];
-      privly.privlyReferencesRegex.lastIndex = 0;
-      if(a.href && privly.privlyReferencesRegex.test(a.href))
+      this.privlyReferencesRegex.lastIndex = 0;
+      if(a.href && this.privlyReferencesRegex.test(a.href))
       {
-        var exclude = a.getAttribute("privly");
-        if(exclude != "exclude")
-        {
-          if(privly.active)
-          {
-            privly.replaceLink(a);
+      	var exclude = a.getAttribute("privly");
+        if(exclude == null || exclude != "exclude"){
+          if(this.extensionMode == privly.extensionModeEnum.ACTIVE){
+            this.replaceLink(a);
           }
-          else
-          {
-            privly.makePassive(a);
+          else if(this.extensionMode == privly.extensionModeEnum.PASSIVE){
+            a.innerHTML = 'Read in Place';
+			opera.postError("a = " + a);
+            //a.addEventListener("mousedown",privly.makePassive,true);
+			privly.makePassive(a);
+          }
+          else if(this.extensionMode == privly.extensionModeEnum.CLICKTHROUGH){
+            a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
+            a.setAttribute('target','_blank');
+            a.removeEventListener("mousedown",privly.makePassive,true);
           }
         }
       }
@@ -217,7 +242,9 @@ var privly = {
     var iframe = document.getElementById("ifrm"+data[0]);
     iframe.style.height = data[1]+'px';
   },
-  
+  //indicates whether the extension shoud immediatly replace all Privly
+  //links it encounters
+  extensionMode: widget.preferences.extensionMode,
   //prevents DOMNodeInserted from sending hundreds of extension runs
   runPending: false,
   
@@ -234,6 +261,8 @@ var privly = {
     privly.replaceLinks();
   },
   
+  // Reference to background Process Window.
+  // Used to avoid unnecessary Messaging Calls for inter-process communication.
   bgProcess: "",
   
   //runs privly once then registers the update listener
@@ -262,8 +291,7 @@ var privly = {
       //we check the page a maximum of two times a second
       if(privly.runPending )
         return;
-      privly.runPending=true;
-	  
+      privly.runPending=true;	  
       
       setTimeout(
         function(){
@@ -313,32 +341,28 @@ var privly = {
 	};*/
 	opera.extension.onmessage = function(event){
 		// Get content of incoming message.
+		opera.postError("inside onmsg");
 		var d  = event.data;
-		if(d.type == "privly:init")
-		{
+		if(d.type == "privly:init")	{
 			privly.bgProcess = event.source;
 			//opera.postError("Background process sent");
 		}
-		if(d.type == "postContentSuccess")
-		{
+		if(d.type == "postContentSuccess") {
 			if(d.post.postTag == "textarea")
 			{
 				//document.getElementsByTagName("textarea")[d.post.postLocation].value = d.message;
 				//d.post.target.value = d.message;
 				//TODO: Use document.querySelectorAll('textarea,input') instead
-				for (i=0; i < document.getElementsByTagName("textarea").length; i++)
-				{
-					if(document.getElementsByTagName("textarea")[i].value == d.post.content)
-					{
+				for (i=0; i < document.getElementsByTagName("textarea").length; i++) {
+					if(document.getElementsByTagName("textarea")[i].value == d.post.content) {
 						document.getElementsByTagName("textarea")[i].onchange = null;												
 						document.getElementsByTagName("textarea")[i].value = d.message;
 					}
 				}
-				if(document.domain == "facebook.com")
-				{
+				
+				if(document.domain == "facebook.com") {
 					var hiddenInputTags = document.querySelectorAll("input[type='hidden']"); 
-					for (i=0; i < hiddenInputTags.length; i++)
-					{
+					for (i=0; i < hiddenInputTags.length; i++) {
 						if(hiddenInputTags[i].value == d.post.content)
 						{
 							hiddenInputTags[i].onchange = null;												
@@ -347,8 +371,8 @@ var privly = {
 					}
 				}
 			}
-			if(d.post.postTag == "input")
-			{				
+			
+			if(d.post.postTag == "input") {				
 				var inputTags = document.querySelectorAll("input[type='text']"); 
 				for (i=0; i < inputTags.length; i++)
 				{
@@ -361,20 +385,22 @@ var privly = {
 			}
 			
 		}
-		if(d.type == "postContentFailed")
-		{
-			
+		
+		if(d.type == "postContentFailed") {
+			opera.postError("postContentFailed");
+		}
+		
+		if(d.type == "extensionModeChange")	{
+			//opera.postError("premodechange: " + d.mode);
+			privly.extensionMode = d.mode;
+			//opera.postError("postmodechange: " + d.mode);
 		}
 
 		//  Replies back to background script.
 		//var reply = "Background process's message only had " + (message ? message.length : 0) + " characters.";
 		//privly.bgProcess.postMessage(reply); 
-};
-  },
-  
-  //indicates whether the extension shoud immediatly replace all Privly
-  //links it encounters
-  active: true
+	};
+  }
 };
 
 privly.listeners();
