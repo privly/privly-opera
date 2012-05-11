@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets" id="https://www.priv.ly/" version="0.1.1-3">
+<widget xmlns="http://www.w3.org/ns/widgets" id="https://www.priv.ly/" version="0.1.2-0">
 	<name>Privly</name>
 	<description>Privly enables you to post and read private content through any website. Only the people you designate can read your content, and the host page never has access. This extension is still experimental. For more information, visit https://priv.ly</description>
-  	<author href="https://priv.ly" email="write2sanchit@gmail.com">Sanchit Karve</author>
-  	<icon src="icons/logo_64.png"/>
+	<author href="https://priv.ly" email="write2sanchit@gmail.com">Sanchit Karve</author>
+	<icon src="icons/logo_64.png"/>
 	<access origin="https://www.priv.ly" subdomains="true"/>
 	<access origin="http://www.priv.ly" subdomains="true"/>
 	<access origin="https://priv.ly" subdomains="true"/>
@@ -11,5 +11,5 @@
 	<feature name="opera:share-cookies" required="false"/>
 	<license href="http://www.opensource.org/licenses/MIT" />
 	<preference name="authToken" value="" />
-    <preference name="extensionMode" value="0" />
+	<preference name="extensionMode" value="0" />
 </widget>
