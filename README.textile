@@ -4,8 +4,8 @@ Opera handles extensions in a much different way than Firefox and Chrome. This d
 
 h2. How To Use The Opera Extension
 
-The Alpha Release (i.e. version 0.1.1.2) has been accepted into the "Opera Extensions Catalog":https://addons.opera.com/en/addons/extensions/.
-"Click here":https://addons.opera.com/en/extensions/details/privly/?display=en to download it.
+Version 0.1.1.2 has been accepted into the "Opera Extensions Catalog":https://addons.opera.com/en/addons/extensions/.
+"Click here":https://addons.opera.com/en/extensions/details/privly/?display=en to download it. It is pre-alpha.
 
 To try out Privly in "developer mode", simply download the source and drag the config.xml file into your Opera browser to install it.
 
@@ -21,3 +21,7 @@ h2. Caveats
 ** All child objects (location, XPathResult, addEventHandler) need to be prefixed with 'window'. (window.location, window.XPathResult, window.addEventHandler)
 * Opera hates bad code
 ** Most Javascript errors cause the extension to stop working. For example, in the resizeIframe function in privly.js, a string is expected. However, a MessageType object is also sent once by the browser. Other browsers ignore the error caused by attempting a split() on an Object but Opera doesn't like it at all.
+
+h2. To join the Privly community:
+* Join the Google Group: http://groups.google.com/group/privly
+* Follow the directions of this post: http://groups.google.com/group/privly/browse_thread/thread/7c670d92fa19ba0e
