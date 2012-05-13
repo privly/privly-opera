@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/options.css">
+  <title id="widget-title">Opera Extensions | Privly</title>
+</head>
+<body>
+  <header>
+    <img src="icons/logo_64.png">
+    <h1 id="widget-name">Privly</h1>
+    <h2>By <span id="widget-author">Sanchit Karve</h2>
+	<p>Privly enables you to post and read private content through any website. Only the people you designate can read your content, and the host page never has access. This extension is still experimental.</p>
+  </header>
+
+  <section>	
+    <h3>Login to Privly</h3>
+    <fieldset id="frmLogin">
+      <p>		
+		<label for="txtEmail" style="margin-right: 22px;">Email:</label>
+        <input id="txtEmail" name="txtEmail" type="text"></input>        		
+      </p>
+      <p>
+		<label for="txtPassword">Password:</label>
+        <input id="txtPassword" name="txtPassword" type="password"></input>        
+      </p>
+      <p>
+		<button name="btnLogin" id="btnLogin">Login</button>
+		<label for="btnLogin" style="display: none; color:red;" id="lblLoginStatus"></label>        
+      </p>
+    </fieldset>		   
+	
+    <fieldset id="frmLogout">
+      <p>
+        <button name="btnLogout" id="btnLogout">Logout</button>
+		<label for="btnLogin" style="display: none; color:red;" id="lblLogoutStatus"></label>        
+      </p>
+    </fieldset>		
+    
+
+    <h3>Extension Mode</h3>
+    <fieldset>
+      <p>
+	  <form action="">
+		<input type="radio" id="modeActive" name="extensionMode" value="active" /> <label for="modeActive">Active - Shows content from priv.ly on the page automatically</label><br />
+		<input type="radio" id="modePassive" name="extensionMode" value="passive" /><label for="modePassive">Passive - Shows content from priv.ly on the page only when you click on the link</label><br />
+		<input type="radio" id="modeClickThrough" name="extensionMode" value="clickthrough" /><label for="modeClickThrough">Require Clickthrough - Takes you to the corresponding priv.ly post on a new tab</label>
+		</form>        
+      </p>      
+    </fieldset>
+	
+	<h3>Preferences</h3>
+    <fieldset>
+      <p>
+	    <input name="check" id="check1" value="0" type="checkbox"></input>
+        <label for="check1">Autorun (NOT IMPLEMENTED)</label>
+      </p>      
+    </fieldset>
+
+    <p>For more information, visit <a href="https://www.priv.ly">Priv.ly</a>.</p>
+
+  </section>
+
+  <footer>
+    <p>Powered by Priv.ly</p>
+  </footer>
+<script src="scripts/jquery-1.7.2.min.js"></script>
+<script>
+//Settings Page Message Handler
+// Used here to retrieve result of user login to Privly.
+// Message (and Message Codes) sent by Background Process.
+opera.extension.onmessage = function(event) {		
+		//opera.postError("INMessage");
+		var d = event.data;
+		if(d.type == 'loginSuccess') {
+			//widget.preferences.authToken = opera.extension.bgProcess.privlyAuthentication.authToken;
+			//alert("You are now logged into Privly");
+			//opera.postError('InSuccessMsg');
+			$('#lblLoginStatus').text('You are now logged into Privly.');
+			$('#lblLoginStatus').fadeIn();	
+			toggleLoginForm();
+			//window.close();
+		}
+		else if(d.type == 'loginFailed') {			
+			//alert("Incorrect email or password for Priv.ly login");
+			//opera.postError('inFailedMsg');
+			$('#lblLoginStatus').text('Incorrect email or password for Privly login.');
+			$('#lblLoginStatus').fadeIn();			
+			toggleLoginForm();
+			
+		}		
+		else if(d.type == 'loginServerUnreachable') {			
+			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
+			//opera.postError('inUnreachMSG');
+			$('#lblLoginStatus').text('We could not contact the Priv.ly servers. If the problem persists, please file a bug report.');
+			$('#lblLoginStatus').fadeIn();
+			toggleLoginForm();
+		}
+		else if(d.type == 'logoutSuccess') {			
+			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");			
+			$('#lblLogoutStatus').text('Logged out successfully.');
+			$('#lblLogoutStatus').fadeIn();
+			toggleLoginForm();
+			//$('#lblLoginStatus').text('We could not contact the Priv.ly servers. If the problem persists, please file a bug report.').fadeIn();
+		}
+		else if(d.type == 'logoutFailure') {			
+			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");			
+			$('#lblLogoutStatus').text("Logout Error :" + d.message);
+			$('#lblLogoutStatus').fadeIn();	
+			toggleLoginForm();			
+		}
+}
+	
+$(document).ready(function() {	
+	$('#widget-title').text(widget.name);
+	$('#widget-name').text(widget.name);
+	$('#widget-author').text(widget.author);		
+	toggleLoginForm();
+	
+	// Load Preferences		
+	if(widget.preferences.extensionMode) {
+		var storedMode = widget.preferences.extensionMode;
+		opera.postError(storedMode);
+		var modeEnums = opera.extension.bgProcess.extensionModeEnum;
+		$('input[name=extensionMode]:radio')[storedMode].checked = true;
+		opera.postError($('input[name=extensionMode]:radio')[storedMode].checked);		
+	}
+	else {
+		var modeEnums = opera.extension.bgProcess.extensionModeEnum;
+		widget.preferences.extensionMode = modeEnums.ACTIVE;
+		opera.extension.bgProcess.broadcastModeChange(modeEnums.ACTIVE);
+		$('input[name=extensionMode]:radio')[modeEnums.ACTIVE].checked = true;
+	}
+	updateBadge();
+	
+	
+	$('#btnLogin').click(function() {
+		$('#lblLoginStatus').text('Signing In...');
+		$('#lblLoginStatus').fadeIn();
+		$('#lblLogoutStatus').text('');
+		$('#lblLogoutStatus').hide();
+		//opera.postError('inLogin');
+		var userEmailAddress = $('#txtEmail').val();
+		var userPassword = $('#txtPassword').val();				
+		// Call Login Function from background process
+		opera.extension.bgProcess.privlyAuthentication.loginToPrivly(userEmailAddress,userPassword);
+		return false;
+   });   
+   
+   $('#btnLogout').click(function() {	
+		$('#lblLogoutStatus').text('Logging out...');
+		$('#lblLogoutStatus').fadeIn();
+		$('#lblLoginStatus').text('');
+		$('#lblLoginStatus').hide();
+		//opera.postError('inLogout');
+		var userEmailAddress = $('#txtEmail').val();
+		var userPassword = $('#txtPassword').val();				
+		// Call Login Function from background process
+		opera.extension.bgProcess.privlyAuthentication.logoutFromPrivly();
+		return false;
+   });
+   
+   $("input[name=extensionMode]:radio").bind('click',function() {
+		var checkedMode = $('input[name=extensionMode]:radio:checked').val();
+		var modeEnums = opera.extension.bgProcess.extensionModeEnum;
+		var modeVal = 0;
+		if(checkedMode == "active")
+			modeVal = modeEnums.ACTIVE;
+		else if(checkedMode == "passive")
+			modeVal = modeEnums.PASSIVE;
+		else if(checkedMode == "clickthrough")
+			modeVal = modeEnums.CLICKTHROUGH;
+			
+		widget.preferences.extensionMode = modeVal;	
+		opera.extension.bgProcess.broadcastModeChange(modeVal);
+		updateBadge();
+	}); 
+		
+});
+
+// Updates the Badge on the Extension's button
+function updateBadge() {
+	var extMode = widget.preferences.extensionMode;
+	var modeEnums = opera.extension.bgProcess.extensionModeEnum;
+	if(extMode == modeEnums.ACTIVE)	{
+		// Hide the button
+		opera.extension.bgProcess.extensionButton.badge.display = "none";
+	}
+	else if(extMode == modeEnums.PASSIVE) {
+		opera.extension.bgProcess.extensionButton.badge.textContent = "P";
+		opera.extension.bgProcess.extensionButton.badge.display = "block";
+	}
+	else if(extMode == modeEnums.CLICKTHROUGH) {
+		opera.extension.bgProcess.extensionButton.badge.textContent = "CT";
+		opera.extension.bgProcess.extensionButton.badge.display = "block";
+	}	
+}
+
+
+function toggleLoginForm() {
+	if(widget.preferences.authToken !== "") {
+		$('#frmLogin').hide();
+		$('#frmLogout').show();
+	}
+	else {
+		$('#frmLogout').hide();
+		$('#frmLogin').show();
+	}
+}
+</script>
+</body>
+</html>
