@@ -66,146 +66,148 @@
   </footer>
 <script src="scripts/jquery-1.7.2.min.js"></script>
 <script>
-//Settings Page Message Handler
+// Settings Page Message Handler
 // Used here to retrieve result of user login to Privly.
 // Message (and Message Codes) sent by Background Process.
 opera.extension.onmessage = function(event) {		
-		//opera.postError("INMessage");
-		var d = event.data;
-		if(d.type == 'loginSuccess') {
-			//widget.preferences.authToken = opera.extension.bgProcess.privlyAuthentication.authToken;
-			//alert("You are now logged into Privly");
-			//opera.postError('InSuccessMsg');
-			$('#lblLoginStatus').text('You are now logged into Privly.');
-			$('#lblLoginStatus').fadeIn();	
-			toggleLoginForm();
-			//window.close();
-		}
-		else if(d.type == 'loginFailed') {			
-			//alert("Incorrect email or password for Priv.ly login");
-			//opera.postError('inFailedMsg');
-			$('#lblLoginStatus').text('Incorrect email or password for Privly login.');
-			$('#lblLoginStatus').fadeIn();			
-			toggleLoginForm();
-			
-		}		
-		else if(d.type == 'loginServerUnreachable') {			
-			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
-			//opera.postError('inUnreachMSG');
-			$('#lblLoginStatus').text('We could not contact the Priv.ly servers. If the problem persists, please file a bug report.');
-			$('#lblLoginStatus').fadeIn();
-			toggleLoginForm();
-		}
-		else if(d.type == 'logoutSuccess') {			
-			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");			
-			$('#lblLogoutStatus').text('Logged out successfully.');
-			$('#lblLogoutStatus').fadeIn();
-			toggleLoginForm();
-			//$('#lblLoginStatus').text('We could not contact the Priv.ly servers. If the problem persists, please file a bug report.').fadeIn();
-		}
-		else if(d.type == 'logoutFailure') {			
-			//alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");			
-			$('#lblLogoutStatus').text("Logout Error :" + d.message);
-			$('#lblLogoutStatus').fadeIn();	
-			toggleLoginForm();			
-		}
+  //opera.postError("INMessage");
+  var d = event.data;
+  if(d.type == 'loginSuccess') {
+    //widget.preferences.authToken = opera.extension.bgProcess.privlyAuthentication.authToken;
+    //alert("You are now logged into Privly");
+    //opera.postError('InSuccessMsg');
+    $('#lblLoginStatus').text('You are now logged into Privly.');
+    $('#lblLoginStatus').fadeIn();	
+    toggleLoginForm();
+    //window.close();
+  }
+  else if(d.type == 'loginFailed') {			
+    //alert("Incorrect email or password for Priv.ly login");
+    //opera.postError('inFailedMsg');
+    $('#lblLoginStatus').text('Incorrect email or password for Privly login.');
+    $('#lblLoginStatus').fadeIn();			
+    toggleLoginForm();
+  }		
+  else if(d.type == 'loginServerUnreachable') {			
+    //alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
+    //opera.postError('inUnreachMSG');
+    $('#lblLoginStatus').text('We could not contact the Priv.ly servers. If the problem persists, please file a bug report.');
+    $('#lblLoginStatus').fadeIn();
+    toggleLoginForm();
+  }
+  else if(d.type == 'logoutSuccess') {			
+    //alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");			
+    $('#lblLogoutStatus').text('Logged out successfully.');
+    $('#lblLogoutStatus').fadeIn();
+    toggleLoginForm();
+    //$('#lblLoginStatus').text('We could not contact the Priv.ly servers. If the problem persists, please file a bug report.').fadeIn();
+  }
+  else if(d.type == 'logoutFailure') {			
+    //alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");			
+    $('#lblLogoutStatus').text("Logout Error :" + d.message);
+    $('#lblLogoutStatus').fadeIn();	
+    toggleLoginForm();			
+  }
 }
-	
+
 $(document).ready(function() {	
-	$('#widget-title').text(widget.name);
-	$('#widget-name').text(widget.name);
-	$('#widget-author').text(widget.author);		
-	toggleLoginForm();
-	
-	// Load Preferences		
-	if(widget.preferences.extensionMode) {
-		var storedMode = widget.preferences.extensionMode;
-		opera.postError(storedMode);
-		var modeEnums = opera.extension.bgProcess.extensionModeEnum;
-		$('input[name=extensionMode]:radio')[storedMode].checked = true;
-		opera.postError($('input[name=extensionMode]:radio')[storedMode].checked);		
-	}
-	else {
-		var modeEnums = opera.extension.bgProcess.extensionModeEnum;
-		widget.preferences.extensionMode = modeEnums.ACTIVE;
-		opera.extension.bgProcess.broadcastModeChange(modeEnums.ACTIVE);
-		$('input[name=extensionMode]:radio')[modeEnums.ACTIVE].checked = true;
-	}
-	updateBadge();
-	
-	
-	$('#btnLogin').click(function() {
-		$('#lblLoginStatus').text('Signing In...');
-		$('#lblLoginStatus').fadeIn();
-		$('#lblLogoutStatus').text('');
-		$('#lblLogoutStatus').hide();
-		//opera.postError('inLogin');
-		var userEmailAddress = $('#txtEmail').val();
-		var userPassword = $('#txtPassword').val();				
-		// Call Login Function from background process
-		opera.extension.bgProcess.privlyAuthentication.loginToPrivly(userEmailAddress,userPassword);
-		return false;
-   });   
-   
-   $('#btnLogout').click(function() {	
-		$('#lblLogoutStatus').text('Logging out...');
-		$('#lblLogoutStatus').fadeIn();
-		$('#lblLoginStatus').text('');
-		$('#lblLoginStatus').hide();
-		//opera.postError('inLogout');
-		var userEmailAddress = $('#txtEmail').val();
-		var userPassword = $('#txtPassword').val();				
-		// Call Login Function from background process
-		opera.extension.bgProcess.privlyAuthentication.logoutFromPrivly();
-		return false;
-   });
-   
-   $("input[name=extensionMode]:radio").bind('click',function() {
-		var checkedMode = $('input[name=extensionMode]:radio:checked').val();
-		var modeEnums = opera.extension.bgProcess.extensionModeEnum;
-		var modeVal = 0;
-		if(checkedMode == "active")
-			modeVal = modeEnums.ACTIVE;
-		else if(checkedMode == "passive")
-			modeVal = modeEnums.PASSIVE;
-		else if(checkedMode == "clickthrough")
-			modeVal = modeEnums.CLICKTHROUGH;
-			
-		widget.preferences.extensionMode = modeVal;	
-		opera.extension.bgProcess.broadcastModeChange(modeVal);
-		updateBadge();
-	}); 
-		
+  $('#widget-title').text(widget.name);
+  $('#widget-name').text(widget.name);
+  $('#widget-author').text(widget.author);		
+  toggleLoginForm();
+
+  // Load Preferences		
+  if(widget.preferences.extensionMode) {
+    var storedMode = widget.preferences.extensionMode;
+    opera.postError(storedMode);
+    var modeEnums = opera.extension.bgProcess.extensionModeEnum;
+    $('input[name=extensionMode]:radio')[storedMode].checked = true;
+    opera.postError($('input[name=extensionMode]:radio')[storedMode].checked);		
+  }
+  else {
+    var modeEnums = opera.extension.bgProcess.extensionModeEnum;
+    widget.preferences.extensionMode = modeEnums.ACTIVE;
+    opera.extension.bgProcess.broadcastModeChange(modeEnums.ACTIVE);
+    $('input[name=extensionMode]:radio')[modeEnums.ACTIVE].checked = true;
+  }
+  updateBadge();
+
+
+  $('#btnLogin').click(function() {
+    $('#lblLoginStatus').text('Signing In...');
+    $('#lblLoginStatus').fadeIn();
+    $('#lblLogoutStatus').text('');
+    $('#lblLogoutStatus').hide();
+    //opera.postError('inLogin');
+    var userEmailAddress = $('#txtEmail').val();
+    var userPassword = $('#txtPassword').val();				
+    // Call Login Function from background process
+    opera.extension.bgProcess.privlyAuthentication.loginToPrivly(userEmailAddress,userPassword);
+    return false;
+  });   
+
+  $('#btnLogout').click(function() {	
+    $('#lblLogoutStatus').text('Logging out...');
+    $('#lblLogoutStatus').fadeIn();
+    $('#lblLoginStatus').text('');
+    $('#lblLoginStatus').hide();
+    //opera.postError('inLogout');
+    var userEmailAddress = $('#txtEmail').val();
+    var userPassword = $('#txtPassword').val();				
+    // Call Login Function from background process
+    opera.extension.bgProcess.privlyAuthentication.logoutFromPrivly();
+    return false;
+  });
+
+  $("input[name=extensionMode]:radio").bind('click',function() {
+    var checkedMode = $('input[name=extensionMode]:radio:checked').val();
+    var modeEnums = opera.extension.bgProcess.extensionModeEnum;
+    var modeVal = 0;
+    if(checkedMode == "active") {
+      modeVal = modeEnums.ACTIVE;
+    }
+    else if(checkedMode == "passive") {
+      modeVal = modeEnums.PASSIVE;
+    }
+    else if(checkedMode == "clickthrough") {
+      modeVal = modeEnums.CLICKTHROUGH;
+    }
+
+    widget.preferences.extensionMode = modeVal;	
+    opera.extension.bgProcess.broadcastModeChange(modeVal);
+    updateBadge();
+  }); 
+
 });
 
 // Updates the Badge on the Extension's button
 function updateBadge() {
-	var extMode = widget.preferences.extensionMode;
-	var modeEnums = opera.extension.bgProcess.extensionModeEnum;
-	if(extMode == modeEnums.ACTIVE)	{
-		// Hide the button
-		opera.extension.bgProcess.extensionButton.badge.display = "none";
-	}
-	else if(extMode == modeEnums.PASSIVE) {
-		opera.extension.bgProcess.extensionButton.badge.textContent = "P";
-		opera.extension.bgProcess.extensionButton.badge.display = "block";
-	}
-	else if(extMode == modeEnums.CLICKTHROUGH) {
-		opera.extension.bgProcess.extensionButton.badge.textContent = "CT";
-		opera.extension.bgProcess.extensionButton.badge.display = "block";
-	}	
+  var extMode = widget.preferences.extensionMode;
+  var modeEnums = opera.extension.bgProcess.extensionModeEnum;
+  if(extMode == modeEnums.ACTIVE)	{
+  // Hide the button
+  opera.extension.bgProcess.extensionButton.badge.display = "none";
+  }
+  else if(extMode == modeEnums.PASSIVE) {
+  opera.extension.bgProcess.extensionButton.badge.textContent = "P";
+  opera.extension.bgProcess.extensionButton.badge.display = "block";
+  }
+  else if(extMode == modeEnums.CLICKTHROUGH) {
+  opera.extension.bgProcess.extensionButton.badge.textContent = "CT";
+  opera.extension.bgProcess.extensionButton.badge.display = "block";
+  }	
 }
 
 
 function toggleLoginForm() {
-	if(widget.preferences.authToken !== "") {
-		$('#frmLogin').hide();
-		$('#frmLogout').show();
-	}
-	else {
-		$('#frmLogout').hide();
-		$('#frmLogin').show();
-	}
+  if(widget.preferences.authToken !== "") {
+    $('#frmLogin').hide();
+    $('#frmLogout').show();
+  }
+  else {
+    $('#frmLogout').hide();
+    $('#frmLogin').show();
+  }
 }
 </script>
 </body>
