@@ -30,13 +30,14 @@ a:hover, a:active {
 	}
 </style>  	
 </head>
-<body>
-  <div id="loginContentOnly">
+<body>  
     <ul>
       <li id="postContent" class="postContent">Post Content</li>      		
       <li id="postContentPreview" class="postContent" style="color:orange;"></li>
+      <li id="postAnonymousOrPublicContent"><input type="checkbox" id="chkAnonymousOrPublicPost" /><label for="chkAnonymousOrPublicPost">Post Anonymously</input></li>
     </ul>
     <br />		
+    <div id="loginContentOnly">
     <ul>
       <li><a href="https://priv.ly/posts">My Posts</a></li>      
       <li><a href="https://priv.ly/pages/account">My Account</a></li>		
@@ -51,11 +52,17 @@ a:hover, a:active {
 <script>
 $(document).ready(function() {		
   if(widget.preferences.authToken) {
-    $('#loginContentOnly').show();
+    $('#loginContentOnly').show();    
+    $('input[id=chkAnonymousOrPublicPost]').attr('checked', (widget.preferences.allPostsPublic == "true") );    
+    $('input[id=chkAnonymousOrPublicPost]').attr('disabled',false);
+    $('label[for=chkAnonymousOrPublicPost]').text('Post Publicly');
     $('#options').text('Logout From Privly');
   }
   else {
     $('#loginContentOnly').hide();
+    $('input[id=chkAnonymousOrPublicPost]').attr('checked',true);
+    $('input[id=chkAnonymousOrPublicPost]').attr('disabled',true);
+    $('label[for=chkAnonymousOrPublicPost]').text('Post Anonymously');
     $('#options').text('Login To Privly');
   }
 
@@ -76,7 +83,12 @@ $(document).ready(function() {
 
   $('.postContent').click(function() {
     if(opera.extension.bgProcess.postInfo.content !== "") {
-      opera.extension.bgProcess.privlyAuthentication.postToPrivly();
+      if(widget.preferences.authToken) {        
+        opera.extension.bgProcess.privlyAuthentication.postToPrivly($('input[id=chkAnonymousOrPublicPost]').is(':checked') ? "public" : "private");
+      }
+      else {        
+        opera.extension.bgProcess.privlyAuthentication.postAnonymouslyToPrivly();
+      }
     }
   });
   /*

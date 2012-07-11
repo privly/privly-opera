@@ -52,8 +52,8 @@
 	<h3>Preferences</h3>
     <fieldset>
       <p>
-	    <input name="check" id="check1" value="0" type="checkbox"></input>
-        <label for="check1">Autorun (NOT IMPLEMENTED)</label>
+	    <input id="chkAllPostsPublic" type="checkbox"></input>
+        <label for="chkAllPostsPublic">All Posts Public</label>
       </p>      
     </fieldset>
 
@@ -130,6 +130,7 @@ $(document).ready(function() {
     opera.extension.bgProcess.broadcastModeChange(modeEnums.ACTIVE);
     $('input[name=extensionMode]:radio')[modeEnums.ACTIVE].checked = true;
   }
+  $('input[id=chkAllPostsPublic]').attr('checked', widget.preferences.allPostsPublic == "true" );
   updateBadge();
 
 
@@ -157,6 +158,12 @@ $(document).ready(function() {
     // Call Login Function from background process
     opera.extension.bgProcess.privlyAuthentication.logoutFromPrivly();
     return false;
+  });
+  
+  $('input[id=chkAllPostsPublic]').change(function() {
+    widget.preferences.allPostsPublic = $('input[id=chkAllPostsPublic]').is(':checked') ? "true" : "false";
+    //opera.postError($(this).val);
+    //opera.postError("state = " + $('input[id=chkAllPostsPublic]').attr('checked'));
   });
 
   $("input[name=extensionMode]:radio").bind('click',function() {

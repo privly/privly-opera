@@ -206,11 +206,12 @@ var privlyAuthentication = {
       }
     });  
   },
-
-  /**
-   * Sends new content to the content server.
+  
+  /** 
+   * Send data anonymously from the right-clicked form element to the content server, then
+   * assign the form element to the returned URL.
    */
-  postToPrivly : function() {
+  postAnonymouslyToPrivly: function () { 
     // Opera 11.x does not support cross-origin scripting.
     // Rumors suggest Opera 12 will fix it.
     // Until then, jQuery provides a nice hack.
@@ -221,6 +222,53 @@ var privlyAuthentication = {
       data: {
         auth_token: privlyAuthentication.authToken,
         "post[content]": postInfo.content,
+        "post[public]": true,
+        endpoint: "extension",
+        browser:"opera",
+        version:"0.1.1.3"
+      },
+      type: "POST",
+      //TODO:Use opera.widgets.preferences to store contentServerUrl and other strings. Remove hardcoded url
+      //url: privlyExtension.preferences.getCharPref("contentServerUrl")+"/token_authentications.json",
+      url: "https://priv.ly/posts/posts_anonymous.json",  
+      contentType: "application/x-www-form-urlencoded; charset=UTF-8",        
+      success: function(data, textStatus, jqXHR) {        
+        //Broadcast Success Message to Preferences Page (options.html)
+        opera.extension.broadcastMessage({type: "postContentSuccess", message:jqXHR.getResponseHeader("privlyurl"), post: postInfo});      
+        postInfo.content = "";
+      },
+      error: function(data, textStatus, jqXHR) {            
+        //Broadcast Server Error Message to Preferences Page (options.html)
+        opera.extension.broadcastMessage({type: "postContentFailed"});          
+      }
+    });
+  },
+
+  /**
+   * Sends new content to the content server.
+   * @param {string} privacySetting Indicates the privacy level of the post.
+   * Accepted values are 'public', and anything else.
+   * Unlike the firefox extension, even if the extension is set
+   * to "allPostsArePublic", this parameter is NOT ignored. 
+   * If "allPostsArePublic" is not true, and privacySetting is anything other 
+   * than public, the post is made as private.
+   */
+  postToPrivly : function(privacySetting) {
+    // Opera 11.x does not support cross-origin scripting.
+    // Rumors suggest Opera 12 will fix it.
+    // Until then, jQuery provides a nice hack.
+    $.support.cors = true;    
+    
+    //Currently, declaring allPostsPublic is unnecessary
+    //var allPostsPublic = (widget.preferences.allPostsPublic == "true");
+    var postPrivacySetting = (privacySetting === 'public');
+
+    $.ajax({
+      //TODO: Get version number directly from config.xml
+      data: {
+        auth_token: privlyAuthentication.authToken,
+        "post[content]": postInfo.content,
+        "post[public]": postPrivacySetting,
         endpoint: "extension",
         browser:"opera",
         version:"0.1.1.3"

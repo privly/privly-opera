@@ -367,7 +367,8 @@ var privly = {
               a.innerHTML = privly.messages.burntPrivlyContent + burntMessage;
             }
             else {
-              a.innerHTML = privly.messages.contentExpired;
+              this.replaceLink(a);
+              //a.innerHTML = privly.messages.contentExpired;
             }
             a.setAttribute('target','_blank');
             a.removeEventListener("mousedown",privly.makePassive,true);
