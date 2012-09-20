@@ -10,7 +10,7 @@ Opera handles extensions in a much different way than Firefox and Chrome. This d
 
 h2. How To Use The Opera Extension
 
-Version 0.1.2.0 has been accepted into the "Opera Extensions Catalog":https://addons.opera.com/en/addons/extensions/.
+Version 0.1.2.1 has been accepted into the "Opera Extensions Catalog":https://addons.opera.com/en/addons/extensions/.
 "Click here":https://addons.opera.com/en/extensions/details/privly/?display=en to download it. It is pre-alpha.
 
 To try out Privly in "developer mode", simply download the source and drag the config.xml file into your Opera browser to install it.
