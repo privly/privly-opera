@@ -1,33 +1,5 @@
-h1. About Privly
+h1. This Repository is Deprecated
 
-For more information on what Privly is, see https://priv.ly.
+After Opera moved to WebKit, they adopted the same extension framework as Chromium. Thus, the Opera extension is now developing on a branch of the Privly-Chrome repository.
 
-The development home of Privly is at http://www.privly.org/. For information on how to join the Privly community, read this: http://www.privly.org/content/welcome-privly-development
-
-h1. The Privly Opera Extension
-
-Opera handles extensions in a much different way than Firefox and Chrome. This document details the differences and other information that might be useful.
-
-h2. How To Use The Opera Extension
-
-Version 0.1.2.1 has been accepted into the "Opera Extensions Catalog":https://addons.opera.com/en/addons/extensions/.
-"Click here":https://addons.opera.com/en/extensions/details/privly/?display=en to download it. It is pre-alpha.
-
-To try out Privly in "developer mode", simply download the source and drag the config.xml file into your Opera browser to install it.
-
-h2. Caveats
-* No Context Menu API
-** It is impossible to extend Opera's context menu in versions 11.x and below. However, Opera devs have promised a Context Menu API for Opera 12.
-* Inter-Script Communication
-** Opera offers its own "Messaging API":http://dev.opera.com/articles/view/extensions-api-messaging/ along with a "bgProcess":http://dev.opera.com/articles/view/extensions-api-messaging-bgProcess/ object for inter-script communication. "Click here":http://dev.opera.com/articles/view/accessing-an-opera-extensions-background-process/ for more information on how messaging works with bgProcess.
-* No Cross-Origin Web Requests
-** This is most probably a bug as Opera does allow the "access tag":http://dev.opera.com/articles/view/extensions-api-config-access/ in the extension's config file.
-** A current workaround is to either use JSONP (which is not currently supported by Privly) or a jQuery Hack ( $.support.cors = true; )
-* No direct access of child objects of the window object.
-** All child objects (location, XPathResult, addEventHandler) need to be prefixed with 'window'. (window.location, window.XPathResult, window.addEventHandler)
-* Opera hates bad code
-** Most Javascript errors cause the extension to stop working. For example, in the resizeIframe function in privly.js, a string is expected. However, a MessageType object is also sent once by the browser. Other browsers ignore the error caused by attempting a split() on an Object but Opera doesn't like it at all.
-
-h2. To join the Privly community:
-* Join the Google Group: http://groups.google.com/group/privly
-* Follow the directions of this post: http://groups.google.com/group/privly/browse_thread/thread/7c670d92fa19ba0e
+See the branch on the Chrome extension: https://github.com/privly/privly-chrome/tree/opera
